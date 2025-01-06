@@ -1,0 +1,27 @@
+{
+    "name": "mgraichy/tenant-aware",
+    "description": "A package for multitenancy",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Mgraichy\\TenantAware\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marlon Graichy",
+            "email": "mgraichy@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mgraichy\\TenantAware\\TenantAwareServiceProvider"
+            ],
+            "aliases": {
+                "TenantAware": "Mgraichy\\TenantAware\\Facade"
+            }
+        }
+    },
+    "minimum-stability": "dev"
+}
