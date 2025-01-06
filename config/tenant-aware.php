@@ -1,12 +1,22 @@
 <?php
 
+use App\TenantAware\ClassOne;
+use App\TenantAware\ClassTwo;
+
 return [
 
     'domain' => 'dev.testbase',
 
     'additional_classes' => [
-        // [ClassName::class],
-        // [ClassName2::class, [param-for-construction1, ...]],
+    //     [ClassOne::class],
+    //     [
+    //         ClassTwo::class,
+    //         [
+    //             [1,2,3],
+    //             'hey',
+    //             App\Models\User::class,
+    //         ]
+    //     ],
     ],
 
     'tenant' => [

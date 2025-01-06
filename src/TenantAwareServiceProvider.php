@@ -31,22 +31,22 @@ class TenantAwareServiceProvider extends ServiceProvider
             __DIR__.'/../config/tenant-aware.php' => config_path('tenant-aware.php'),
         ], 'tenant-aware-subdomains');
 
-        //             Run __invoke():
-        $this->app[TenantAware::class]();
-        $this->runAdditionalClasses();
+        if ($this->app['request']->getHost()) {
+            $this->app[TenantAware::class]();
+            $this->runAdditionalClasses();
+        }
     }
 
     protected function registerAdditionalClasses()
     {
-        $classArray = config('tenant-aware.additional_classes');
-        if (!empty($classArray)) {
-            foreach ($classArray as $class) {
-                $this->app->bind($class::class, function () use ($class) {
-                    if (!empty($class[1])) {
-                        return new $class[0](...$class[1]);
-                    }
-
-                    return new $class[0]();
+        $classMatrix = config('tenant-aware.additional_classes');
+        if (!empty($classMatrix)) {
+            foreach ($classMatrix as $classArray) {
+                $class = $classArray[0];
+                $parameters = $classArray[1] ?? [];
+                $this->app->bind($class, function () use ($class, $parameters) {
+                    $temp = $parameters ? new $class(...$parameters) : new $class();
+                    return $temp;
                 });
             }
         }
@@ -54,9 +54,12 @@ class TenantAwareServiceProvider extends ServiceProvider
 
     protected function runAdditionalClasses()
     {
-        $classArray = config('tenant-aware.additional_classes');
-        if (!empty($classArray)) {
-            //
+        $classMatrix = config('tenant-aware.additional_classes');
+        if (!empty($classMatrix)) {
+            foreach ($classMatrix as $classArray) {
+                $class = $classArray[0];
+                $this->app[$class]();
+            }
         }
     }
 }

@@ -21,7 +21,10 @@ class TenantAware
             if (isset($tenantSwitcher->tenant_domain))
             {
                 $this->switchTenant($tenantSwitcher);
+                $this->setWhoAmI($tenantSwitcher);
                 $this->configureQueue();
+                // $this->configureFileSystem();
+                // $this->etc();
             }
         }
     }
@@ -39,6 +42,14 @@ class TenantAware
         // tries to get a connection:
         DB::purge('tenant');
         app('cache')->purge(config('cache.default'));
+    }
+
+    protected function setWhoAmI($tenantSwitcher)
+    {
+        // Removes present instance from the container (if any):
+        $this->app->forgetInstance('tenantSwitcher');
+        // Places the current instance in the container:
+        $this->app->instance('tenantSwitcher', $tenantSwitcher);
     }
 
     protected function configureQueue()
