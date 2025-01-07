@@ -45,8 +45,7 @@ class TenantAwareServiceProvider extends ServiceProvider
                 $class = $classArray[0];
                 $parameters = $classArray[1] ?? [];
                 $this->app->bind($class, function () use ($class, $parameters) {
-                    $temp = $parameters ? new $class(...$parameters) : new $class();
-                    return $temp;
+                    return $parameters ? new $class(...$parameters) : new $class();
                 });
             }
         }

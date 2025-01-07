@@ -20,8 +20,7 @@ class TenantAware
     {
         if (!($this->app->runningInConsole())) {
             $host = $this->app['request']->getHost();
-            $this->tenantSwitcher = DB::connection('mysql')
-                ->table('tenant_switcher')
+            $this->tenantSwitcher = DB::table('tenant_switcher')
                 ->where('tenant_domain', $host)
                 ->first();
             if (isset($this->tenantSwitcher->tenant_domain))
@@ -64,8 +63,7 @@ class TenantAware
         $payload = function ($event) {
             // "tenant_id" is truly unique, in the system_db:
             if (isset($event->job->payload()['tenant_id'])) {
-                $this->tenantSwitcher = DB::connection('mysql')
-                    ->table('tenant_switcher')
+                $this->tenantSwitcher = DB::table('tenant_switcher')
                     ->where('tenant_id', $event->job->payload()['tenant_id'])
                     ->first();
                 $this->configureDatabase();
