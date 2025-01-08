@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Middleware\TenantSessions;
 
 $routes = function () {
     Route::get('/', [StorefrontController::class, 'index']);
@@ -21,4 +22,4 @@ $routes = function () {
 };
 
 $domain = config('tenant-aware.domain');
-Route::domain("{tenant}.$domain")->group($routes);
+Route::domain("{tenant}.$domain")->middleware(['web', TenantSessions::class])->group($routes);
