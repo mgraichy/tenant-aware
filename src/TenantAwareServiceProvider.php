@@ -9,7 +9,7 @@ class TenantAwareServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TenantAware::class, function () {
-            return new TenantAware($this->app);
+            return new TenantAware();
         });
         $this->registerAdditionalClasses();
     }
@@ -40,14 +40,17 @@ class TenantAwareServiceProvider extends ServiceProvider
     protected function registerAdditionalClasses()
     {
         $classMatrix = config('tenant-aware.additional_classes');
-        if (!empty($classMatrix)) {
-            foreach ($classMatrix as $classArray) {
-                $class = $classArray[0];
-                $parameters = $classArray[1] ?? [];
-                $this->app->bind($class, function () use ($class, $parameters) {
-                    return $parameters ? new $class(...$parameters) : new $class();
-                });
-            }
+
+        if (empty($classMatrix)) {
+            return;
+        }
+
+        foreach ($classMatrix as $classArray) {
+            $class = $classArray[0];
+            $parameters = $classArray[1] ?? [];
+            $this->app->bind($class, function () use ($class, $parameters) {
+                return $parameters ? new $class(...$parameters) : new $class();
+            });
         }
     }
 
