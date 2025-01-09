@@ -16,11 +16,10 @@ class TenantAwareServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (file_exists(base_path('routes/subdomains.php'))) {
-            $this->loadRoutesFrom(base_path('routes/subdomains.php'));
-        } else {
+        $loadFromConsumingApplication = base_path('routes/subdomains.php');
+        file_exists($loadFromConsumingApplication) ?
+            $this->loadRoutesFrom($loadFromConsumingApplication) :
             $this->loadRoutesFrom(__DIR__.'/../routes/subdomains.php');
-        }
 
         $this->publishesMigrations([
             __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),

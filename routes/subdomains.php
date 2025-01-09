@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StorefrontController;
-use App\Http\Middleware\TenantSessions;
+use Mgraichy\TenantAware\Http\Middleware\TenantSessions;
 
 $routes = function () {
     Route::get('/', [StorefrontController::class, 'index']);

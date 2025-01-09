@@ -42,9 +42,9 @@ trait MakesTenantAware
 
         $currentTenant = function ($event) {
             if (isset($event->job->payload()['tenant_id'])) {
+                // If a tenant_id has been set on this payload, use it in the system_db
+                // to get which tenant (subdomain) this is:
                 $tenantSwitcher = app('db')->table('tenant_switcher')
-                    // If a tenant_id has been set on this payload, use it in the system_db
-                    // to get which tenant (subdomain) this is:
                     ->where('id', $event->job->payload()['tenant_id'])
                     ->first();
                 $this->configureDatabase($tenantSwitcher);
