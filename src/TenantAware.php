@@ -14,10 +14,8 @@ class TenantAware
                 ->where('tenant_domain', $host)
                 ->first();
             if (isset($tenantSwitcher->tenant_domain)) {
-                $this->configureDatabase($tenantSwitcher);
-                $this->configureCache($tenantSwitcher);
+                $this->configureDatabases($tenantSwitcher);
                 $this->configureQueue();
-                $this->registerTenantInContainer($tenantSwitcher);
             }
         }
     }

@@ -6,36 +6,30 @@ use Illuminate\Queue\Events\JobProcessing;
 
 trait MakesTenantAware
 {
-    protected function configureDatabase(?\stdClass $tenantSwitcher = null): void
+    protected function configureDatabases(?\stdClass $tenantSwitcher = null): void
     {
         if (!$tenantSwitcher) {
             return;
         }
 
+        // Configure the tenant switcher:
         config(['database.connections.tenant' => config('tenant-aware.tenant')]);
         config(['database.connections.tenant.database' => $tenantSwitcher->tenant_database]);
         app('db')->purge('tenant');
-    }
 
-    protected function configureCache(?\stdClass $tenantSwitcher = null): void
-    {
-        if (!$tenantSwitcher) {
-            return;
-        }
-
+        // Configure the cache DB, usually Redis:
         config(['cache.prefix' => "{$tenantSwitcher->tenant_database}_{$tenantSwitcher->id}"]);
         app('cache')->purge(config('cache.default'));
+
+        $this->registerTenantInContainer($tenantSwitcher);
     }
 
     protected function configureQueue(): void
     {
-        // Add a tenant ID to the payload iff app('tenantConfigs') is present
-        // (meaning this is in fact a request coming from a subdomain).
-        // NB: you're adding the ID to the payload, and not to "app('tenantConfigs')":
         $tenantIdForPayload = function () {
-            $tenantConfigs = app('tenantConfigs');
-            $payload = $tenantConfigs ?
-                ['tenant_id' => $tenantConfigs['tenantSwitcher']->id] :
+            $tenantSwitcher = app('tenantSwitcher');
+            $payload = $tenantSwitcher ?
+                ['tenant_id' => $tenantSwitcher->id] :
                 [];
 
             return $payload;
@@ -43,15 +37,12 @@ trait MakesTenantAware
 
         app('queue')->createPayloadUsing($tenantIdForPayload);
 
-        $currentTenant = function ($event) {
-
+        $currentTenant = function (JobProcessing $event) {
             if (isset($event->job->payload()['tenant_id'])) {
-                // If a tenant_id has been set on this payload, use it in the system_db
-                // to get which tenant (subdomain) this is:
                 $tenantSwitcher = app('db')->table('tenant_switcher')
                     ->where('id', $event->job->payload()['tenant_id'])
                     ->first();
-                $this->configureDatabase($tenantSwitcher);
+                $this->configureDatabases($tenantSwitcher);
                 $this->registerTenantInContainer($tenantSwitcher);
             }
         };
@@ -61,10 +52,7 @@ trait MakesTenantAware
 
     protected function registerTenantInContainer(?\stdClass $tenantSwitcher = null): void
     {
-        app()->forgetInstance('tenantConfigs');
-        app()->instance('tenantConfigs', [
-            'tenantSwitcher' => $tenantSwitcher,
-            'cache.prefix config' => config('cache.prefix'),
-        ]);
+        app()->forgetInstance('tenantSwitcher');
+        app()->instance('tenantSwitcher', $tenantSwitcher);
     }
 }

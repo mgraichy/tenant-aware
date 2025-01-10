@@ -16,7 +16,7 @@ class TenantSessions
     public function handle(Request $request, Closure $next): Response
     {
         $app = app();
-        $tenantSwitcher = $app['tenantConfigs']['tenantSwitcher'] ?? null;
+        $tenantSwitcher = $app['tenantSwitcher'] ?? null;
 
         if (empty($tenantSwitcher)) {
             return $next($request);

@@ -62,9 +62,7 @@ class TenantAwareArtisan extends Command
 
     protected function configureTenant($switched)
     {
-        $this->configureDatabase($switched);
-        $this->configureCache($switched);
+        $this->configureDatabases($switched);
         $this->configureQueue();
-        $this->registerTenantInContainer($switched);
     }
 }
