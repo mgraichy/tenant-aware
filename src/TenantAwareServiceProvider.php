@@ -3,6 +3,7 @@
 namespace Mgraichy\TenantAware;
 
 use Illuminate\Support\ServiceProvider;
+use Mgraichy\TenantAware\Console\Commands\TenantAwareArtisan;
 
 class TenantAwareServiceProvider extends ServiceProvider
 {
@@ -29,6 +30,12 @@ class TenantAwareServiceProvider extends ServiceProvider
             __DIR__.'/../routes/subdomains.php'   => base_path('routes/subdomains.php'),
             __DIR__.'/../config/tenant-aware.php' => config_path('tenant-aware.php'),
         ], 'tenant-aware-subdomains');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                TenantAwareArtisan::class,
+            ]);
+        }
 
         if ($this->app['request']->getHost()) {
             $this->app[TenantAware::class]();

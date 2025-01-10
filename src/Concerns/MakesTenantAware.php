@@ -3,6 +3,7 @@
 namespace Mgraichy\TenantAware\Concerns;
 
 use Illuminate\Queue\Events\JobProcessing;
+
 trait MakesTenantAware
 {
     protected function configureDatabase(?\stdClass $tenantSwitcher = null): void
@@ -33,14 +34,17 @@ trait MakesTenantAware
         // NB: you're adding the ID to the payload, and not to "app('tenantConfigs')":
         $tenantIdForPayload = function () {
             $tenantConfigs = app('tenantConfigs');
-            return $tenantConfigs ?
+            $payload = $tenantConfigs ?
                 ['tenant_id' => $tenantConfigs['tenantSwitcher']->id] :
                 [];
+
+            return $payload;
         };
 
         app('queue')->createPayloadUsing($tenantIdForPayload);
 
         $currentTenant = function ($event) {
+
             if (isset($event->job->payload()['tenant_id'])) {
                 // If a tenant_id has been set on this payload, use it in the system_db
                 // to get which tenant (subdomain) this is:

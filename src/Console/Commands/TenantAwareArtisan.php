@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Mgraichy\TenantAware\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -18,8 +18,8 @@ class TenantAwareArtisan extends Command
      * @var string
      */
     protected $signature = 'tenants:foreach
-        {--tenants=* : Which tenant(s) to run the command on. Accepts: "tenant_switcher.id" or "tenant_switcher.tenant_name". Leave absent for "all tenants".}
         {artisanCommand : The Artisan "command:modifier" you want to apply to 1+ tenants}
+        {--tenant=* : Which tenant(s) to run the command on. Accepts: "tenant_switcher.id" or "tenant_switcher.tenant_name". Leave absent for "all tenants".}
         {--params= : Standard Artisan parameters e.g. --params="--database=tenant --no-interaction"}';
 
     /**
@@ -27,8 +27,7 @@ class TenantAwareArtisan extends Command
      *
      * @var string
      */
-    protected $description = 'Runs an Artisan command on 1+ tenants, e.g.:
-        php artisan tenants:foreach --tenants=1 --tenants="Some Name" migrate:rollback --params="--database=tenant --force"';
+    protected $description = 'Runs an Artisan command on 1+ tenants';
 
     /**
      * Execute the console command.
@@ -36,7 +35,7 @@ class TenantAwareArtisan extends Command
     public function handle()
     {
         $baseDbManager = DB::table('tenant_switcher')->select('id', 'tenant_name', 'tenant_domain', 'tenant_database');
-        $tenants = $this->option('tenants');
+        $tenants = $this->option('tenant');
         $tenantSwitcher = $tenants ?
             $baseDbManager->whereIn('id', $tenants)->orWhereIn('tenant_name', $tenants)->get() :
             $baseDbManager->get();
