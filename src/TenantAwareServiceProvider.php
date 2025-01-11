@@ -3,6 +3,9 @@
 namespace Mgraichy\TenantAware;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Log;
+use Mgraichy\TenantAware\Models\TenantSwitcher;
 use Mgraichy\TenantAware\Console\Commands\TenantAwareArtisan;
 
 class TenantAwareServiceProvider extends ServiceProvider
@@ -37,10 +40,57 @@ class TenantAwareServiceProvider extends ServiceProvider
             ]);
         }
 
-        if ($this->app['request']->getHost()) {
-            $this->app[TenantAware::class]();
+        if (!(app()->runningInConsole()) && $host = $this->app['request']->getHost()) {
+            $tenantSwitcher = TenantSwitcher::where('tenant_domain', $host)->first();
+            if (!$tenantSwitcher) {
+                return;
+            }
+            $tenantSwitcher->configureDatabases()->registerTenantSwitcherInContainer();
+
+            $this->configureQueue();
             $this->runAdditionalClasses();
         }
+    }
+
+    protected function configureQueue()
+    {
+
+        // $tenantIdForPayload = function () {
+        //     return ['tenant_id' => 1];
+        // };
+        // app('queue')->createPayloadUsing($tenantIdForPayload);
+
+        // $payloadEvent = function (JobProcessing $event) {
+        //     Log::info('Event listener ran..');
+        //     if ($event->job->payload()['tenant_id']) {
+        //         Log::info('ID', ['tenant_id' => $event->job->payload()['tenant_id']]);
+        //     }
+        // };
+        // app('events')->listen(JobProcessing::class, $payloadEvent);
+
+
+        $tenantIdForPayload = function () {
+            $app = app();
+            $tenantSwitcher = $app['tenantSwitcher'] ?? null;
+            $payload = $tenantSwitcher ?
+                ['tenant_id' => $tenantSwitcher->id] :
+                [];
+
+            return $payload;
+        };
+
+        app('queue')->createPayloadUsing($tenantIdForPayload);
+
+        $payloadEvent = function (JobProcessing $event) {
+            Log::info('EVENT LISTENER HAS FINALLY RUN!!!', ['gawd'=>'damn']);
+            if ($event->job->payload()['tenant_id']) {
+                TenantSwitcher::find($event->job->payload()['tenant_id'])
+                    ->configureDatabases()
+                    ->registerTenantSwitcherInContainer();
+            }
+        };
+
+        app('events')->listen(JobProcessing::class, $payloadEvent);
     }
 
     protected function registerAdditionalClasses()
