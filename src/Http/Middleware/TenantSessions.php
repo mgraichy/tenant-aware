@@ -18,7 +18,7 @@ class TenantSessions
         $app = app();
         $tenantSwitcher = $app['tenantSwitcher'] ?? null;
 
-        if (empty($tenantSwitcher)) {
+        if (!$tenantSwitcher) {
             return $next($request);
         }
 

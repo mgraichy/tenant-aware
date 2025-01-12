@@ -25,6 +25,7 @@ class TenantAwareServiceProvider extends ServiceProvider
 
         $this->publishesMigrations([
             __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
+            __DIR__ . '/../database/migrations/tenants' => database_path('migrations/tenants'),
         ], 'tenant-aware-migrations');
 
         $this->publishes([
@@ -43,8 +44,8 @@ class TenantAwareServiceProvider extends ServiceProvider
             $tenantAware($host);
             $this->runAdditionalClasses();
         }
-        // For e.g., queues, "php artisan ...", etc.
-        // (all running within the console):
+        // For e.g., tests, queues, "php artisan ...", etc.
+        // all of which run within the console:
         $tenantAware->configureQueue();
     }
 

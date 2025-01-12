@@ -5,13 +5,13 @@ namespace Mgraichy\TenantAware\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Mgraichy\TenantAware\Concerns\MakesTenantAware;
 
 
 class TenantAwareArtisan extends Command
 {
     use MakesTenantAware;
-
     /**
      * The name and signature of the console command.
      *
@@ -46,23 +46,19 @@ class TenantAwareArtisan extends Command
         $individualTenantCommand = "$artisanCommand $params";
 
         foreach ($tenantSwitcher as $switched) {
-            $this->newLine(2);
+            $this->newLine();
             $this->line("---------------------------------------------------------------");
             $this->info("Running '$artisanCommand' for {$switched->tenant_name} (Tenant ID: {$switched->id})");
             $this->line("---------------------------------------------------------------");
-            $this->configureTenant($switched);
+            $this->configureDatabases($switched);
             try {
                 Artisan::call($individualTenantCommand);
-                $this->line("Successfully ran '$artisanCommand'");
+                $this->line("Successfully ran: $individualTenantCommand");
             } catch(\Throwable $e) {
+                $this->line('Something\'s gone wrong:');
                 $this->line($e->getMessage());
+                Log::error(__METHOD__.'():', ['stacktrace' => $e->getTrace()]);
             }
         }
-    }
-
-    protected function configureTenant($switched)
-    {
-        $this->configureDatabases($switched);
-        $this->configureQueue();
     }
 }
