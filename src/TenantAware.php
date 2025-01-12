@@ -2,30 +2,42 @@
 
 namespace Mgraichy\TenantAware;
 
-use Mgraichy\TenantAware\Models\TenantSwitcher;
+use Illuminate\Queue\Events\JobProcessing;
+use Mgraichy\TenantAware\Models\TenantSwitcherModel;
+
 class TenantAware
 {
-    // use Concerns\MakesTenantAware;
-
-    public function __invoke()
+    public function __invoke(string $host): void
     {
-        if (!(app()->runningInConsole())) {
-            $host = app('request')->getHost();
-            TenantSwitcher::where('tenant_domain', $host)
-                ->first()
-                ->configureDatabases()
-                ->configureQueue();
+        $tenantSwitcher = TenantSwitcherModel::where('tenant_domain', $host)->first();
+
+        if (!$tenantSwitcher) {
+            return;
         }
 
-        // if (!(app()->runningInConsole())) {
-        //     $host = app('request')->getHost();
-        //     $tenantSwitcher = app('db')->table('tenant_switcher')
-        //         ->where('tenant_domain', $host)
-        //         ->first();
-        //     if (isset($tenantSwitcher->tenant_domain)) {
-        //         $this->configureDatabases($tenantSwitcher);
-        //         $this->configureQueue();
-        //     }
-        // }
+        $tenantSwitcher->configureDatabases()->registerTenantSwitcherInContainer();
+    }
+
+    public function configureQueue()
+    {
+        $tenantIdForPayload = function () {
+            $app = app();
+            $tenantSwitcher = $app['tenantSwitcher'] ?? null;
+            $payload = $tenantSwitcher ?
+                ['tenant_id' => $tenantSwitcher->id] :
+                [];
+
+            return $payload;
+        };
+        app('queue')->createPayloadUsing($tenantIdForPayload);
+
+        $eventPayload = function (JobProcessing $event) {
+            if ($event->job->payload()['tenant_id']) {
+                TenantSwitcherModel::find($event->job->payload()['tenant_id'])
+                    ->configureDatabases()
+                    ->registerTenantSwitcherInContainer();
+            }
+        };
+        app('events')->listen(JobProcessing::class, $eventPayload);
     }
 }
