@@ -12,14 +12,15 @@ class TenantAwareServiceProvider extends ServiceProvider
         $this->app->bind(TenantAware::class, function () {
             return new TenantAware();
         });
+
         $this->registerAdditionalClasses();
     }
 
     public function boot(): void
     {
-        $loadFromConsumingApplication = base_path('routes/subdomains.php');
-        file_exists($loadFromConsumingApplication) ?
-            $this->loadRoutesFrom($loadFromConsumingApplication) :
+        $consumingApplication = base_path('routes/subdomains.php');
+        file_exists($consumingApplication) ?
+            $this->loadRoutesFrom($consumingApplication) :
             $this->loadRoutesFrom(__DIR__.'/../routes/subdomains.php');
 
         $this->publishesMigrations([
@@ -42,7 +43,7 @@ class TenantAwareServiceProvider extends ServiceProvider
             $tenantAware($host);
             $this->runAdditionalClasses();
         }
-        // The method "->configureQueue()" is for e.g., queues, "php artisan ...", etc.
+        // For e.g., queues, "php artisan ...", etc.
         // (all running within the console):
         $tenantAware->configureQueue();
     }
@@ -56,10 +57,10 @@ class TenantAwareServiceProvider extends ServiceProvider
         }
 
         foreach ($classMatrix as $classArray) {
-            $class = $classArray[0];
-            $parameters = $classArray[1] ?? [];
-            $this->app->bind($class, function () use ($class, $parameters) {
-                return $parameters ? new $class(...$parameters) : new $class();
+            $class = $classArray['FQCN'];
+            $constructParams = $classArray['__construct-params'] ?? [];
+            $this->app->bind($class, function () use ($class, $constructParams) {
+                return $constructParams ? new $class(...$constructParams) : new $class();
             });
         }
     }
@@ -67,11 +68,14 @@ class TenantAwareServiceProvider extends ServiceProvider
     protected function runAdditionalClasses()
     {
         $classMatrix = config('tenant-aware.additional_classes');
-        if (!empty($classMatrix)) {
-            foreach ($classMatrix as $classArray) {
-                $class = $classArray[0];
-                $this->app[$class]();
-            }
+        if (empty($classMatrix)) {
+            return;
+        }
+
+        foreach ($classMatrix as $classArray) {
+            $class = $classArray['FQCN'];
+            $invokeParams = $classArray['__invoke-params'] ?? [];
+            $invokeParams ? $this->app[$class](...$invokeParams) : $this->app[$class]();
         }
     }
 }

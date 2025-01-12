@@ -1,23 +1,10 @@
 <?php
 
-use App\TenantAware\ClassOne;
-use App\TenantAware\ClassTwo;
-
 return [
 
-    'domain' => 'dev.testbase',
+    'domain' => '',
 
-    'additional_classes' => [
-    //     [ClassOne::class],
-    //     [
-    //         ClassTwo::class,
-    //         [
-    //             [1,2,3],
-    //             'hey',
-    //             App\Models\User::class,
-    //         ]
-    //     ],
-    ],
+    'additional_classes' => [],
 
     'tenant' => [
         'driver' => 'mysql',
