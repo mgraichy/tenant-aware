@@ -23,10 +23,12 @@ class TenantAwareServiceProvider extends ServiceProvider
             $this->loadRoutesFrom($consumingApplication) :
             $this->loadRoutesFrom(__DIR__.'/../routes/subdomains.php');
 
-        $this->publishesMigrations([
-            __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
-            __DIR__ . '/../database/migrations/tenants' => database_path('migrations/tenants'),
-        ], 'tenant-aware-migrations');
+        if (!is_dir(database_path('migrations/system-db'))) {
+            $this->publishesMigrations([
+                __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
+                __DIR__ . '/../database/migrations/tenants' => database_path('migrations/tenants'),
+            ], 'tenant-aware-migrations');
+        }
 
         $this->publishes([
             __DIR__.'/../routes/subdomains.php'   => base_path('routes/subdomains.php'),
@@ -42,14 +44,14 @@ class TenantAwareServiceProvider extends ServiceProvider
         $tenantAware = $this->app[TenantAware::class];
         if (!(app()->runningInConsole()) && $host = $this->app['request']->getHost()) {
             $tenantAware($host);
-            $this->runAdditionalClasses();
         }
         // For e.g., tests, queues, "php artisan ...", etc.
         // all of which run within the console:
         $tenantAware->configureQueue();
+        $this->runAdditionalClasses();
     }
 
-    protected function registerAdditionalClasses()
+    protected function registerAdditionalClasses(): void
     {
         $classMatrix = config('tenant-aware.additional_classes');
 
@@ -66,7 +68,7 @@ class TenantAwareServiceProvider extends ServiceProvider
         }
     }
 
-    protected function runAdditionalClasses()
+    protected function runAdditionalClasses(): void
     {
         $classMatrix = config('tenant-aware.additional_classes');
         if (empty($classMatrix)) {
