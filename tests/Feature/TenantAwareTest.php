@@ -3,6 +3,7 @@
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
+
 it('publishes all files for TenantAware', function() {
     $command = 'vendor:publish --tag=tenant-aware-migrations --tag=tenant-aware-subdomains';
     $this->artisan($command)->assertSuccessful();
@@ -43,7 +44,7 @@ it('inserts to or updates the tenant_switcher table', function() {
 });
 
 it('installs database tables corresponding to subdomains', function() {
-    $command = 'tenants:foreach migrate --params="--path=database/migrations/testing-tenants --realpath"';
+    $command = 'tenants:foreach migrate --params="--path=../database/migrations/testing-tenants --realpath"';
     $this->artisan($command)->assertSuccessful();
 });
 
