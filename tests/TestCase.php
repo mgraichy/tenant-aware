@@ -10,6 +10,13 @@ abstract class TestCase extends BaseTestCase
 {
     use MakesTenantAware;
 
+    // If you want to run tests on this package,
+    // change at least $username and $password to reflect your own setup:
+    protected $username = 'mg';
+    protected $password = 'pw';
+    protected $domain   = 'example.com';
+    protected $database = 'db_tests';
+
     protected function getPackageProviders($app)
     {
         return [
@@ -19,38 +26,72 @@ abstract class TestCase extends BaseTestCase
 
     protected function defineEnvironment($app)
     {
+        config(['database.default' => 'mysql']);
+        config(['database.connections.mysql.username' => $this->username]);
+        config(['database.connections.mysql.password' => $this->password]);
+
+        $this->createDbs();
+
         tap($app['config'], function (Repository $config) {
-            // If you want to put this package through tests,
-            // change the following variables to reflect your own setup:
-            $domain   = 'dev.testbase';
-            $database = 'db_tests';
-            $username = 'mg';
-            $password = 'pw';
+            // $additionalClasses = $this->getAdditionalClasses();
+            $config->set('database.connections.mysql.database', $this->database);
+            $config->set('tenant-aware.domain', $this->domain);
+            $config->set('database.connections.tenant', config('tenant-aware.tenant'));
+            $config->set('database.connections.tenant.username', $this->username);
+            $config->set('database.connections.tenant.password', $this->password);
 
-            $config->set('database.default', 'mysql');
-            $config->set('database.connections.mysql', [
-                'driver' => 'mysql',
-                'url' => env('DB_URL'),
-                'host' => env('DB_HOST', '127.0.0.1'),
-                'port' => env('DB_PORT', '3306'),
-                'database' => $database,
-                'username' => $username,
-                'password' => $password,
-                'unix_socket' => env('DB_SOCKET', ''),
-                'charset' => env('DB_CHARSET', 'utf8mb4'),
-                'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-                'prefix' => '',
-                'prefix_indexes' => true,
-                'strict' => true,
-                'engine' => null,
-                'options' => extension_loaded('pdo_mysql') ? array_filter([
-                    \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                ]) : [],
-            ]);
-
-            $config->set('tenant-aware.domain', $domain);
-            $config->set('tenant-aware.tenant.username', $username);
-            $config->set('tenant-aware.tenant.password', $password);
+            // $config->set('tenant_aware.additional_classes', $additionalClasses);
         });
+
+        $app['db']->purge();
     }
+
+    protected function createDbs(): void
+    {
+        $db = app('db')->connection('mysql');
+
+        $exists = <<<SQL
+            SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME =  ?;
+        SQL;
+
+        if (empty($db->select($exists, ['db_tests']))) {
+            $dbTests = <<<SQL
+            CREATE SCHEMA IF NOT EXISTS `db_tests`
+                DEFAULT CHARACTER SET = utf8mb4
+                COLLATE = utf8mb4_unicode_ci;
+            SQL;
+
+            $db->select($dbTests);
+
+            $dbElephpants = <<<SQL
+                CREATE SCHEMA IF NOT EXISTS `db_elephpants`
+                    DEFAULT CHARACTER SET = utf8mb4
+                    COLLATE = utf8mb4_unicode_ci;
+            SQL;
+
+            $db->select($dbElephpants);
+        }
+    }
+
+    // protected function getAdditionalClasses()
+    // {
+    //     return [
+    //         [
+    //             'FQCN' => \App\TenantAware\ClassOne::class
+    //         ],
+    //         [
+    //             'FQCN' => \App\TenantAware\ClassTwo::class,
+    //             '__construct-params' => [
+    //                 [1,2,3],
+    //                 'hey',
+    //                 \App\Models\User::class,
+    //             ],
+    //             '__invoke-params' => [
+    //                 [4,5,6],
+    //                 'there',
+    //                 \App\Models\User::class,
+    //             ],
+    //         ],
+    //     ];
+    // }
 }

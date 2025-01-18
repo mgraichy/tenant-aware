@@ -24,10 +24,15 @@ class TenantAwareServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/subdomains.php');
 
         if (!is_dir(database_path('migrations/system-db'))) {
-            $this->publishesMigrations([
+            $migrations = [
                 __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
-                __DIR__ . '/../database/migrations/tenants' => database_path('migrations/tenants'),
-            ], 'tenant-aware-migrations');
+            ];
+            if (!$this->app->environment('testing')) {
+                $migrations[__DIR__ . '/../database/migrations/tenants'] = database_path('migrations/tenants');
+            } else {
+                $migrations[__DIR__ . '/../tests/database/migrations/testing-tenants'] = database_path('migrations/tenants');
+            }
+            $this->publishesMigrations($migrations, 'tenant-aware-migrations');
         }
 
         $this->publishes([
@@ -42,7 +47,7 @@ class TenantAwareServiceProvider extends ServiceProvider
         }
 
         $tenantAware = $this->app[TenantAware::class];
-        if (!(app()->runningInConsole()) && $host = $this->app['request']->getHost()) {
+        if (!($this->app->runningInConsole()) && $host = $this->app['request']->getHost()) {
             $tenantAware($host);
         }
         // For e.g., tests, queues, "php artisan ...", etc.

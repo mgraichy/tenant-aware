@@ -18,6 +18,7 @@ class TenantSessions
         $app = app();
         $tenantSwitcher = $app['tenantSwitcher'] ?? null;
 
+        // We don't put a $tenantSwitcher in iff we're in the CLI, etc:
         if (!$tenantSwitcher) {
             return $next($request);
         }

@@ -1,38 +1,25 @@
 <?php
 
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
-
 
 it('publishes all files for TenantAware', function() {
     $command = 'vendor:publish --tag=tenant-aware-migrations --tag=tenant-aware-subdomains';
     $this->artisan($command)->assertSuccessful();
 });
 
-it('migrates the main database', function() {
-    $this->artisan('migrate')->assertSuccessful();
+it('installs the tenant_switcher table in the main database', function() {
+    $databasePath = database_path('migrations/system-db');
+    $this->artisan("migrate --path=$databasePath --realpath")->assertSuccessful();
 });
 
-it('installs the tenant_switcher table', function() {
-    $command = 'migrate --path=database/migrations/system-db --realpath';
-    $this->artisan($command)->assertSuccessful();
-});
-
-it('inserts to or updates the tenant_switcher table', function() {
+it('INSERTs or UPDATEs the tenant_switcher table', function() {
     $domain = config('tenant-aware.domain');
-    $result = DB::table('tenant_switcher')->upsert(
+    $result = app('db')->table('tenant_switcher')->upsert(
         [
             [
-                'tenant_name' => 'Films Ltd.',
-                'tenant_domain' => "films.$domain",
-                'tenant_database' => 'db_films',
-                'created_at' => CarbonImmutable::now(),
-                'updated_at' => CarbonImmutable::now(),
-            ],
-            [
-                'tenant_name' => 'Elephants Inc.',
-                'tenant_domain' => "elephants.$domain",
-                'tenant_database' => 'db_elephants',
+                'tenant_name' => 'ElePHPants Inc.',
+                'tenant_domain' => "elephpant.$domain",
+                'tenant_database' => 'db_elephpants',
                 'created_at' => CarbonImmutable::now(),
                 'updated_at' => CarbonImmutable::now(),
             ],
@@ -43,18 +30,19 @@ it('inserts to or updates the tenant_switcher table', function() {
     expect($result)->toBeTruthy();
 });
 
-it('installs database tables corresponding to subdomains', function() {
-    $command = 'tenants:foreach migrate --params="--path=../database/migrations/testing-tenants --realpath"';
+
+it('installs the users table on subdomains', function() {
+    $databasePath = database_path('migrations/tenants');
+    $command = "tenants:foreach migrate --params='--database=tenant --path={$databasePath} --realpath'";
     $this->artisan($command)->assertSuccessful();
 });
 
-
-it('inserts to or updates the users table in subdomain databases', function() {
-    $tenantSwitcher = DB::table('tenant_switcher')->get();
+it('INSERTs or UPDATEs the users table in subdomain databases', function() {
+    $tenantSwitcher = app('db')->table('tenant_switcher')->get();
     foreach ($tenantSwitcher as $ts) {
         // From the MakesTenantAware trait in src/TenantAwareServiceProvider.php:
         $this->configureDatabases($ts);
-        $result = DB::connection('tenant')->table('users')->upsert(
+        $result = app('db')->connection('tenant')->table('users')->upsert(
             [
                 [
                     'name' => 'Generic Name',
@@ -72,3 +60,21 @@ it('inserts to or updates the users table in subdomain databases', function() {
         expect($result)->toBeTruthy();
     }
 });
+
+it('tests a subdomain\'s container', function() {
+    $domain = config('tenant-aware.domain');
+    $response = $this->get("https://elephpant.$domain");
+    $response->assertStatus(200);
+    $json = $response->json();
+    dump($json);
+    $type = gettype($json);
+    expect($type)->toBe('array')
+        ->and($json['$tenantVariableFromRoute::domain()'])->toBe('elephpant')
+        ->and($json['currentDatabase'])->toBe('db_elephpants')
+        ->and($json['cachePrefix'])->toBe('db_elephpants_1')
+        ->and($json['tenantSwitcher']['tenant_name'])->toBe('ElePHPants Inc.')
+        ->and($json['tenantSwitcher']['tenant_domain'])->toBe('elephpant.example.com')
+        ->and($json['tenantSwitcher']['tenant_database'])->toBe('db_elephpants');
+});
+
+
