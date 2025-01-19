@@ -10,7 +10,7 @@ abstract class TestCase extends BaseTestCase
 {
     use MakesTenantAware;
 
-    // If you want to run tests on this package,
+    // If you'd like to run tests on this package,
     // change at least $username and $password to reflect your own setup:
     protected $username = 'mg';
     protected $password = 'pw';
@@ -33,14 +33,11 @@ abstract class TestCase extends BaseTestCase
         $this->createDbs();
 
         tap($app['config'], function (Repository $config) {
-            // $additionalClasses = $this->getAdditionalClasses();
             $config->set('database.connections.mysql.database', $this->database);
             $config->set('tenant-aware.domain', $this->domain);
             $config->set('database.connections.tenant', config('tenant-aware.tenant'));
             $config->set('database.connections.tenant.username', $this->username);
             $config->set('database.connections.tenant.password', $this->password);
-
-            // $config->set('tenant_aware.additional_classes', $additionalClasses);
         });
 
         $app['db']->purge();
@@ -72,26 +69,4 @@ abstract class TestCase extends BaseTestCase
             $db->select($dbElephpants);
         }
     }
-
-    // protected function getAdditionalClasses()
-    // {
-    //     return [
-    //         [
-    //             'FQCN' => \App\TenantAware\ClassOne::class
-    //         ],
-    //         [
-    //             'FQCN' => \App\TenantAware\ClassTwo::class,
-    //             '__construct-params' => [
-    //                 [1,2,3],
-    //                 'hey',
-    //                 \App\Models\User::class,
-    //             ],
-    //             '__invoke-params' => [
-    //                 [4,5,6],
-    //                 'there',
-    //                 \App\Models\User::class,
-    //             ],
-    //         ],
-    //     ];
-    // }
 }

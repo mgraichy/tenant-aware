@@ -32,13 +32,27 @@ class TenantAwareServiceProvider extends ServiceProvider
             } else {
                 $migrations[__DIR__ . '/../tests/database/migrations/testing-tenants'] = database_path('migrations/tenants');
             }
+
             $this->publishesMigrations($migrations, 'tenant-aware-migrations');
         }
 
-        $this->publishes([
-            __DIR__.'/../routes/subdomains.php'   => base_path('routes/subdomains.php'),
-            __DIR__.'/../config/tenant-aware.php' => config_path('tenant-aware.php'),
-        ], 'tenant-aware-subdomains');
+        $subdomains = [];
+        if (!$this->app->environment('testing')) {
+            $subdomains = [
+                __DIR__ . '/../config/tenant-aware.php' => config_path('tenant-aware.php'),
+                __DIR__ . '/../routes/subdomains.php' => base_path('routes/subdomains.php'),
+            ];
+        } else {
+            $subdomains = [
+                __DIR__ . '/../tests/config/tenant-aware.php' => config_path('tenant-aware.php'),
+                __DIR__ . '/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
+            ];
+        }
+        $this->publishes($subdomains, 'tenant-aware-subdomains');
+        // $this->publishes([
+        //     __DIR__.'/../config/tenant-aware.php' => config_path('tenant-aware.php'),
+        //     __DIR__ . '/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
+        // ], 'tenant-aware-subdomains');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

@@ -66,7 +66,6 @@ it('tests a subdomain\'s container', function() {
     $response = $this->get("https://elephpant.$domain");
     $response->assertStatus(200);
     $json = $response->json();
-    dump($json);
     $type = gettype($json);
     expect($type)->toBe('array')
         ->and($json['$tenantVariableFromRoute::domain()'])->toBe('elephpant')
