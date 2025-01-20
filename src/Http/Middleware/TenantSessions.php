@@ -15,21 +15,20 @@ class TenantSessions
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $app = app();
-        $tenantSwitcher = $app['tenantSwitcher'] ?? null;
+        $tenantSwitcher = app()['tenantSwitcher'] ?? null;
 
-        // We don't put a $tenantSwitcher in iff we're in the CLI, etc:
+        // For the the CLI, etc:
         if (!$tenantSwitcher) {
             return $next($request);
         }
 
         if (!$request->session()->has('tenant_id')) {
-            $request->session()->put('tenant_id', $tenantSwitcher->id);
+            $request->session()->put('tenant_id', $tenantSwitcher['id']);
 
             return $next($request);
         }
 
-        if ($request->session()->get('tenant_id') !== $tenantSwitcher->id) {
+        if ($request->session()->get('tenant_id') !== $tenantSwitcher['id']) {
             abort(401);
         }
 
