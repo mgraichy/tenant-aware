@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-// use Mgraichy\TenantAware\Models\TenantSwitcherBaseModel;
+// use TenantAware\Models\TenantSwitcherModel;
 use Illuminate\Database\Eloquent\Model;
 
-class Storefront extends Model//TenantSwitcherBaseModel
+class Storefront extends Model//TenantSwitcherModel
 {
     protected $table = 'users';
 

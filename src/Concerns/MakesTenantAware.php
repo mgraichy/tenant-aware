@@ -1,6 +1,6 @@
 <?php
 
-namespace Mgraichy\TenantAware\Concerns;
+namespace TenantAware\Concerns;
 
 trait MakesTenantAware
 {

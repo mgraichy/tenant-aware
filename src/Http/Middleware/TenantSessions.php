@@ -1,6 +1,6 @@
 <?php
 
-namespace Mgraichy\TenantAware\Http\Middleware;
+namespace TenantAware\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Mgraichy\TenantAware\Http\Middleware\TenantSessions;
+use TenantAware\Http\Middleware\TenantSessions;
 
 $routes = function () {
     Route::get('/', function(string $tenant) {

@@ -1,9 +1,9 @@
 <?php
 
-namespace Mgraichy\TenantAware;
+namespace TenantAware;
 
 use Illuminate\Support\ServiceProvider;
-use Mgraichy\TenantAware\Console\Commands\TenantAwareArtisan;
+use TenantAware\Console\Commands\TenantAwareArtisan;
 
 class TenantAwareServiceProvider extends ServiceProvider
 {
@@ -20,7 +20,7 @@ class TenantAwareServiceProvider extends ServiceProvider
     {
         $this->loadRoutes();
         $this->publishMigrations();
-        $this->publishAdditionalSubdomainItems();
+        $this->publishSubdomainFiles();
 
         $tenantAware = $this->app[TenantAware::class];
         if (!($this->app->runningInConsole()) && $host = $this->app['request']->getHost()) {
@@ -74,7 +74,7 @@ class TenantAwareServiceProvider extends ServiceProvider
         }
     }
 
-    protected function publishAdditionalSubdomainItems(): void
+    protected function publishSubdomainFiles(): void
     {
         $subdomains = [];
         if (!$this->app->environment('testing')) {

@@ -1,14 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Mgraichy\TenantAware\Http\Middleware\TenantSessions;
+use TenantAware\Http\Middleware\TenantSessions;
 
 $routes = function () {
     // The $tenant subdomain will be sent to any Controllers used instead of closures:
     Route::get('/', function(string $tenant) {
         // remove the conditions (running in console, actual host) for test:
         $host = app('request')->getHost();
-        $tenantAware = app(\Mgraichy\TenantAware\TenantAware::class);
+        $tenantAware = app(\TenantAware\TenantAware::class);
         $tenantAware->configureSubdomain($host);
         $tenantAware->configureQueue();
 

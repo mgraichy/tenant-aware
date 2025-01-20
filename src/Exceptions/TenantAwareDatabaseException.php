@@ -1,6 +1,6 @@
 <?php
 
-namespace Mgraichy\TenantAware\Exceptions;
+namespace TenantAware\Exceptions;
 
 use Exception;
 

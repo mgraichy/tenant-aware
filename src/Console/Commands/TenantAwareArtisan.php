@@ -1,13 +1,13 @@
 <?php
 
-namespace Mgraichy\TenantAware\Console\Commands;
+namespace TenantAware\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Mgraichy\TenantAware\Concerns\MakesTenantAware;
-use Mgraichy\TenantAware\Exceptions\TenantAwareDatabaseException;
+use TenantAware\Concerns\MakesTenantAware;
+use TenantAware\Exceptions\TenantAwareDatabaseException;
 
 
 class TenantAwareArtisan extends Command

@@ -61,6 +61,17 @@ it('INSERTs or UPDATEs the users table in subdomain databases', function() {
     }
 });
 
+it('publishes subdomain files', function() {
+    $configTestDirectory = realpath(__DIR__.'/../config/tenant-aware.php');
+    $routesTestDirectory = realpath(__DIR__.'/../routes/subdomains.php');
+    // When using orchestra/testbench, Laravel's VendorPublishCommand understandably assumes its own path.
+    // We'll use the same PHP command "copy()" used by Illuminate\Foundation\Console\VendorPublishCommand:
+    $copiedConfigFile = copy($configTestDirectory, config_path('tenant-aware.php'));
+    $copiedRoutesFile = copy($routesTestDirectory, base_path('routes/subdomains.php'));
+    expect($copiedConfigFile)->toBeTrue();
+    expect($copiedRoutesFile)->toBeTrue();
+});
+
 it('tests a subdomain\'s container', function() {
     $domain = config('tenant-aware.domain');
     $response = $this->get("https://elephpant.$domain");

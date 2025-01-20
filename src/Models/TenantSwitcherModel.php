@@ -1,15 +1,15 @@
 <?php
 
-namespace Mgraichy\TenantAware\Models;
+namespace TenantAware\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TenantSwitcherBaseModel extends Model
+class TenantSwitcherModel extends Model
 {
     protected $connection = 'mysql';
     protected $table = 'tenant_switcher';
 
-    public function configureDatabases(): TenantSwitcherBaseModel
+    public function configureDatabases(): TenantSwitcherModel
     {
         // Switch to the appropriate tenant in the configs:
         config(['database.connections.tenant' => config('tenant-aware.tenant')]);
@@ -23,7 +23,7 @@ class TenantSwitcherBaseModel extends Model
         return $this;
     }
 
-    public function registerTenantSwitcherInContainer(): TenantSwitcherBaseModel
+    public function registerTenantSwitcherInContainer(): TenantSwitcherModel
     {
         app()->forgetInstance('tenantSwitcher');
         app()->instance('tenantSwitcher', $this->attributes);

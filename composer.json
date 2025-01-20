@@ -4,7 +4,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Mgraichy\\TenantAware\\": "src/"
+            "TenantAware\\": "src/"
         }
     },
     "autoload-dev": {
@@ -21,10 +21,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Mgraichy\\TenantAware\\TenantAwareServiceProvider"
+                "TenantAware\\TenantAwareServiceProvider"
             ],
             "aliases": {
-                "TenantAware": "Mgraichy\\TenantAware\\Facade"
+                "TenantAware": "TenantAware\\Facade"
             }
         }
     },

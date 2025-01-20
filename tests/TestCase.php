@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use Mgraichy\TenantAware\Concerns\MakesTenantAware;
+use TenantAware\Concerns\MakesTenantAware;
 use Illuminate\Contracts\Config\Repository;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
@@ -20,7 +20,7 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app)
     {
         return [
-            \Mgraichy\TenantAware\TenantAwareServiceProvider::class,
+            \TenantAware\TenantAwareServiceProvider::class,
         ];
     }
 
