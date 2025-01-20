@@ -3,15 +3,16 @@
 namespace Mgraichy\TenantAware;
 
 use Illuminate\Queue\Events\JobProcessing;
-use Mgraichy\TenantAware\Models\TenantSwitcherModel;
+use Mgraichy\TenantAware\Models\TenantSwitcherBaseModel;
 
 class TenantAware
 {
     public function __invoke(string $host): void
     {
-        $tenantSwitcher = TenantSwitcherModel::where('tenant_domain', $host)->first();
+        $tenantSwitcher = TenantSwitcherBaseModel::where('tenant_domain', $host)->first();
 
         if (!$tenantSwitcher) {
+            config(['database.default' => 'mysql']);
             return;
         }
 
@@ -33,7 +34,7 @@ class TenantAware
 
         $eventPayload = function (JobProcessing $event) {
             if ($event->job->payload()['tenant_id']) {
-                TenantSwitcherModel::find($event->job->payload()['tenant_id'])
+                TenantSwitcherBaseModel::find($event->job->payload()['tenant_id'])
                     ->configureDatabases()
                     ->registerTenantSwitcherInContainer();
             }

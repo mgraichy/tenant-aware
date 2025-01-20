@@ -18,47 +18,9 @@ class TenantAwareServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $consumingApplication = base_path('routes/subdomains.php');
-        file_exists($consumingApplication) ?
-            $this->loadRoutesFrom($consumingApplication) :
-            $this->loadRoutesFrom(__DIR__.'/../routes/subdomains.php');
-
-        if (!is_dir(database_path('migrations/system-db'))) {
-            $migrations = [
-                __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
-            ];
-            if (!$this->app->environment('testing')) {
-                $migrations[__DIR__ . '/../database/migrations/tenants'] = database_path('migrations/tenants');
-            } else {
-                $migrations[__DIR__ . '/../tests/database/migrations/testing-tenants'] = database_path('migrations/tenants');
-            }
-
-            $this->publishesMigrations($migrations, 'tenant-aware-migrations');
-        }
-
-        $subdomains = [];
-        if (!$this->app->environment('testing')) {
-            $subdomains = [
-                __DIR__ . '/../config/tenant-aware.php' => config_path('tenant-aware.php'),
-                __DIR__ . '/../routes/subdomains.php' => base_path('routes/subdomains.php'),
-            ];
-        } else {
-            $subdomains = [
-                __DIR__ . '/../tests/config/tenant-aware.php' => config_path('tenant-aware.php'),
-                __DIR__ . '/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
-            ];
-        }
-        $this->publishes($subdomains, 'tenant-aware-subdomains');
-        // $this->publishes([
-        //     __DIR__.'/../config/tenant-aware.php' => config_path('tenant-aware.php'),
-        //     __DIR__ . '/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
-        // ], 'tenant-aware-subdomains');
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                TenantAwareArtisan::class,
-            ]);
-        }
+        $this->loadRoutes();
+        $this->publishMigrations();
+        $this->publishAdditionalSubdomainItems();
 
         $tenantAware = $this->app[TenantAware::class];
         if (!($this->app->runningInConsole()) && $host = $this->app['request']->getHost()) {
@@ -84,6 +46,53 @@ class TenantAwareServiceProvider extends ServiceProvider
             $this->app->bind($class, function () use ($class, $constructParams) {
                 return $constructParams ? new $class(...$constructParams) : new $class();
             });
+        }
+    }
+
+    protected function loadRoutes(): void
+    {
+        $consumingApplication = base_path('routes/subdomains.php');
+        file_exists($consumingApplication) ?
+            $this->loadRoutesFrom($consumingApplication) :
+            $this->loadRoutesFrom(__DIR__.'/../routes/subdomains.php');
+    }
+
+    protected function publishMigrations(): void
+    {
+        if (!is_dir(database_path('migrations/system-db'))) {
+            $migrations = [
+                __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
+            ];
+            if (!$this->app->environment('testing')) {
+                $migrations[__DIR__ . '/../database/migrations/tenants'] = database_path('migrations/tenants');
+            } else {
+                $migrations[__DIR__ . '/../tests/database/migrations/testing-tenants'] = database_path('migrations/tenants');
+            }
+
+            $this->publishesMigrations($migrations, 'tenant-aware-migrations');
+        }
+    }
+
+    protected function publishAdditionalSubdomainItems(): void
+    {
+        $subdomains = [];
+        if (!$this->app->environment('testing')) {
+            $subdomains = [
+                __DIR__ . '/../config/tenant-aware.php' => config_path('tenant-aware.php'),
+                __DIR__ . '/../routes/subdomains.php' => base_path('routes/subdomains.php'),
+            ];
+        } else {
+            $subdomains = [
+                __DIR__ . '/../tests/config/tenant-aware.php' => config_path('tenant-aware.php'),
+                __DIR__ . '/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
+            ];
+        }
+        $this->publishes($subdomains, 'tenant-aware-subdomains');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                TenantAwareArtisan::class,
+            ]);
         }
     }
 
