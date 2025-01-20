@@ -7,7 +7,7 @@ use Mgraichy\TenantAware\Models\TenantSwitcherBaseModel;
 
 class TenantAware
 {
-    public function __invoke(string $host): void
+    public function configureSubdomain(string $host): void
     {
         $tenantSwitcher = TenantSwitcherBaseModel::where('tenant_domain', $host)->first();
 

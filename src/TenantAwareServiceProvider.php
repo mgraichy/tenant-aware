@@ -24,12 +24,13 @@ class TenantAwareServiceProvider extends ServiceProvider
 
         $tenantAware = $this->app[TenantAware::class];
         if (!($this->app->runningInConsole()) && $host = $this->app['request']->getHost()) {
-            $tenantAware($host);
+            $tenantAware->configureSubdomain($host);
         }
         // For e.g., tests, queues, "php artisan ...", etc.
         // all of which run within the console:
         $tenantAware->configureQueue();
-        $this->runAdditionalClasses();
+
+        $this->bootAdditionalClasses();
     }
 
     protected function registerAdditionalClasses(): void
@@ -96,7 +97,7 @@ class TenantAwareServiceProvider extends ServiceProvider
         }
     }
 
-    protected function runAdditionalClasses(): void
+    protected function bootAdditionalClasses(): void
     {
         $classMatrix = config('tenant-aware.additional_classes');
         if (empty($classMatrix)) {
