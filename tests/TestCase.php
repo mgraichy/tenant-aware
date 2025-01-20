@@ -53,9 +53,9 @@ abstract class TestCase extends BaseTestCase
 
         if (empty($db->select($exists, ['db_tests']))) {
             $dbTests = <<<SQL
-            CREATE SCHEMA IF NOT EXISTS `db_tests`
-                DEFAULT CHARACTER SET = utf8mb4
-                COLLATE = utf8mb4_unicode_ci;
+                CREATE SCHEMA IF NOT EXISTS `db_tests`
+                    DEFAULT CHARACTER SET = utf8mb4
+                    COLLATE = utf8mb4_unicode_ci;
             SQL;
 
             $db->select($dbTests);

@@ -11,7 +11,8 @@ trait MakesTenantAware
         }
 
         // Configure the tenant switcher.
-        // Have to include this condition since adding testing: see tests/TestCase.php::defineEnvironment()
+        // Have to include this condition since adding testing:
+        // see tests/TestCase.php::defineEnvironment()
         if (!app()->environment('testing')) {
             config(['database.connections.tenant' => config('tenant-aware.tenant')]);
         }
