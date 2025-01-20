@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Mgraichy\TenantAware\Concerns\MakesTenantAware;
+use Mgraichy\TenantAware\Exceptions\TenantAwareDatabaseException;
 
 
 class TenantAwareArtisan extends Command
@@ -34,7 +35,7 @@ class TenantAwareArtisan extends Command
      */
     public function handle()
     {
-        $baseDbManager = DB::table('tenant_switcher')->select('id', 'tenant_name', 'tenant_domain', 'tenant_database');
+        $baseDbManager = DB::connection('mysql')->table('tenant_switcher')->select('id', 'tenant_name', 'tenant_domain', 'tenant_database');
         $tenants = $this->option('tenant');
         $tenantSwitcher = $tenants ?
             $baseDbManager->whereIn('id', $tenants)->orWhereIn('tenant_name', $tenants)->get() :
@@ -50,15 +51,40 @@ class TenantAwareArtisan extends Command
             $this->line("---------------------------------------------------------------");
             $this->info("Running '$artisanCommand' for {$switched->tenant_name} (Tenant ID: {$switched->id})");
             $this->line("---------------------------------------------------------------");
-            $this->configureDatabases($switched);
+
             try {
+                $this->configureDatabases($switched);
+                $this->doesCurrentDatabaseExist($switched->tenant_database);
                 Artisan::call($individualTenantCommand);
                 $this->line("Successfully ran: $individualTenantCommand");
             } catch(\Throwable $e) {
-                $this->line('Something\'s gone wrong:');
+                $this->line('An exception occurred:');
                 $this->line($e->getMessage());
                 Log::error(__METHOD__.'():', ['stacktrace' => $e->getTrace()]);
             }
+        }
+    }
+
+    protected function doesCurrentDatabaseExist(string $database): void
+    {
+        $exists = <<<SQL
+            SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME =  ?;
+        SQL;
+        if (empty(DB::connection('mysql')->select($exists, [$database]))) {
+            if ($this->confirm("Database '$database' missing. Shall I create it?")) {
+                // Security:
+                $database = preg_replace('/[^A-Za-z0-9_\-]/', '', $database);
+                $db = <<<SQL
+                    CREATE SCHEMA IF NOT EXISTS `$database`
+                        DEFAULT CHARACTER SET = utf8mb4
+                        COLLATE = utf8mb4_unicode_ci;
+                SQL;
+                DB::connection('mysql')->select($db);
+                $this->line("Database '$database' successfully created!");
+                return;
+            }
+
+            throw new TenantAwareDatabaseException('Skipping creation of this database..');
         }
     }
 }
