@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use TenantAware\Http\Middleware\TenantSessions;
 
 $routes = function () {
-    Route::get('/', function(string $tenant) {
+    Route::get('/', function (string $tenant) {
         echo "The \$tenant ('{$tenant}') subdomain will also be sent to any Controllers used instead of closures.";
     });
 };

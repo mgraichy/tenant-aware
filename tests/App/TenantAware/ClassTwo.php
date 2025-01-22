@@ -13,14 +13,14 @@ class ClassTwo
         protected string $str = '',
         ?string $user = '',
     ) {
-        if (!empty($user)) {
-            $this->user = new $user();
+        if (! empty($user)) {
+            $this->user = new $user;
         }
     }
 
     public function __invoke(string $class): void
     {
-        $classOne = new $class();
+        $classOne = new $class;
         $this->someMethod($classOne);
     }
 
@@ -28,5 +28,4 @@ class ClassTwo
     {
         return $classOne;
     }
-
 }

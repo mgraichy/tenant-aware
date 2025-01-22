@@ -6,14 +6,14 @@ trait MakesTenantAware
 {
     protected function configureDatabases(?\stdClass $tenantSwitcher = null): void
     {
-        if (!$tenantSwitcher) {
+        if (! $tenantSwitcher) {
             return;
         }
 
         // Configure the tenant switcher.
         // Have to include this condition since adding testing:
         // see tests/TestCase.php::defineEnvironment()
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             config(['database.connections.tenant' => config('tenant-aware.tenant')]);
         }
         config(['database.connections.tenant.database' => $tenantSwitcher->tenant_database]);

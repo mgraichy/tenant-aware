@@ -10,7 +10,7 @@ class TenantAwareServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TenantAware::class, function () {
-            return new TenantAware();
+            return new TenantAware;
         });
 
         $this->registerAdditionalClasses();
@@ -23,7 +23,7 @@ class TenantAwareServiceProvider extends ServiceProvider
         $this->publishSubdomainFiles();
 
         $tenantAware = $this->app[TenantAware::class];
-        if (!($this->app->runningInConsole()) && $host = $this->app['request']->getHost()) {
+        if (! ($this->app->runningInConsole()) && $host = $this->app['request']->getHost()) {
             $tenantAware->configureSubdomain($host);
         }
         // For e.g., tests, queues, "php artisan ...", etc.
@@ -45,7 +45,7 @@ class TenantAwareServiceProvider extends ServiceProvider
             $class = $classArray['FQCN'];
             $constructParams = $classArray['__construct-params'] ?? [];
             $this->app->bind($class, function () use ($class, $constructParams) {
-                return $constructParams ? new $class(...$constructParams) : new $class();
+                return $constructParams ? new $class(...$constructParams) : new $class;
             });
         }
     }
@@ -60,14 +60,14 @@ class TenantAwareServiceProvider extends ServiceProvider
 
     protected function publishMigrations(): void
     {
-        if (!is_dir(database_path('migrations/system-db'))) {
+        if (! is_dir(database_path('migrations/system-db'))) {
             $migrations = [
-                __DIR__ . '/../database/migrations/system-db' => database_path('migrations/system-db'),
+                __DIR__.'/../database/migrations/system-db' => database_path('migrations/system-db'),
             ];
-            if (!$this->app->environment('testing')) {
-                $migrations[__DIR__ . '/../database/migrations/tenants'] = database_path('migrations/tenants');
+            if (! $this->app->environment('testing')) {
+                $migrations[__DIR__.'/../database/migrations/tenants'] = database_path('migrations/tenants');
             } else {
-                $migrations[__DIR__ . '/../tests/database/migrations/testing-tenants'] = database_path('migrations/tenants');
+                $migrations[__DIR__.'/../tests/database/migrations/testing-tenants'] = database_path('migrations/tenants');
             }
 
             $this->publishesMigrations($migrations, 'tenant-aware-migrations');
@@ -77,15 +77,15 @@ class TenantAwareServiceProvider extends ServiceProvider
     protected function publishSubdomainFiles(): void
     {
         $subdomains = [];
-        if (!$this->app->environment('testing')) {
+        if (! $this->app->environment('testing')) {
             $subdomains = [
-                __DIR__ . '/../config/tenant-aware.php' => config_path('tenant-aware.php'),
-                __DIR__ . '/../routes/subdomains.php' => base_path('routes/subdomains.php'),
+                __DIR__.'/../config/tenant-aware.php' => config_path('tenant-aware.php'),
+                __DIR__.'/../routes/subdomains.php' => base_path('routes/subdomains.php'),
             ];
         } else {
             $subdomains = [
-                __DIR__ . '/../tests/config/tenant-aware.php' => config_path('tenant-aware.php'),
-                __DIR__ . '/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
+                __DIR__.'/../tests/config/tenant-aware.php' => config_path('tenant-aware.php'),
+                __DIR__.'/../tests/routes/subdomains.php' => base_path('routes/subdomains.php'),
             ];
         }
         $this->publishes($subdomains, 'tenant-aware-subdomains');

@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use TenantAware\Concerns\MakesTenantAware;
 use Illuminate\Contracts\Config\Repository;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use TenantAware\Concerns\MakesTenantAware;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -13,8 +13,11 @@ abstract class TestCase extends BaseTestCase
     // If you'd like to run tests on this package,
     // change at least $username and $password to reflect your own setup:
     protected $username = 'mg';
+
     protected $password = 'pw';
-    protected $domain   = 'example.com';
+
+    protected $domain = 'example.com';
+
     protected $database = 'db_tests';
 
     protected function getPackageProviders($app)
@@ -47,12 +50,12 @@ abstract class TestCase extends BaseTestCase
     {
         $db = app('db')->connection('mysql');
 
-        $exists = <<<SQL
+        $exists = <<<'SQL'
             SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME =  ?;
         SQL;
 
         if (empty($db->select($exists, ['db_tests']))) {
-            $dbTests = <<<SQL
+            $dbTests = <<<'SQL'
                 CREATE SCHEMA IF NOT EXISTS `db_tests`
                     DEFAULT CHARACTER SET = utf8mb4
                     COLLATE = utf8mb4_unicode_ci;
@@ -60,7 +63,7 @@ abstract class TestCase extends BaseTestCase
 
             $db->select($dbTests);
 
-            $dbElephpants = <<<SQL
+            $dbElephpants = <<<'SQL'
                 CREATE SCHEMA IF NOT EXISTS `db_elephpants`
                     DEFAULT CHARACTER SET = utf8mb4
                     COLLATE = utf8mb4_unicode_ci;

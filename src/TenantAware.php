@@ -11,8 +11,9 @@ class TenantAware
     {
         $tenantSwitcher = TenantSwitcherModel::where('tenant_domain', $host)->first();
 
-        if (!$tenantSwitcher) {
+        if (! $tenantSwitcher) {
             config(['database.default' => 'mysql']);
+
             return;
         }
 

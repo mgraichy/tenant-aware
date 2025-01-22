@@ -6,12 +6,12 @@ return [
 
     'additional_classes' => [
         [
-            'FQCN' => \Tests\App\TenantAware\ClassOne::class
+            'FQCN' => \Tests\App\TenantAware\ClassOne::class,
         ],
         [
             'FQCN' => \Tests\App\TenantAware\ClassTwo::class,
             '__construct-params' => [
-                [1,2,3],
+                [1, 2, 3],
                 'hey',
                 \Tests\App\Models\User::class,
             ],

@@ -2,17 +2,17 @@
 
 use Carbon\CarbonImmutable;
 
-it('publishes all files for TenantAware', function() {
+it('publishes all files for TenantAware', function () {
     $command = 'vendor:publish --tag=tenant-aware-migrations --tag=tenant-aware-subdomains';
     $this->artisan($command)->assertSuccessful();
 });
 
-it('installs the tenant_switcher table in the main database', function() {
+it('installs the tenant_switcher table in the main database', function () {
     $databasePath = database_path('migrations/system-db');
     $this->artisan("migrate --path=$databasePath --realpath")->assertSuccessful();
 });
 
-it('INSERTs or UPDATEs the tenant_switcher table', function() {
+it('INSERTs or UPDATEs the tenant_switcher table', function () {
     $domain = config('tenant-aware.domain');
     $result = app('db')->table('tenant_switcher')->upsert(
         [
@@ -25,19 +25,18 @@ it('INSERTs or UPDATEs the tenant_switcher table', function() {
             ],
         ],
         ['tenant_domain'],
-        ['tenant_name','tenant_domain','tenant_database','created_at','updated_at']
+        ['tenant_name', 'tenant_domain', 'tenant_database', 'created_at', 'updated_at']
     );
     expect($result)->toBeTruthy();
 });
 
-
-it('installs the users table on subdomains', function() {
+it('installs the users table on subdomains', function () {
     $databasePath = database_path('migrations/tenants');
     $command = "tenants:foreach migrate --params='--database=tenant --path={$databasePath} --realpath'";
     $this->artisan($command)->assertSuccessful();
 });
 
-it('INSERTs or UPDATEs the users table in subdomain databases', function() {
+it('INSERTs or UPDATEs the users table in subdomain databases', function () {
     $tenantSwitcher = app('db')->table('tenant_switcher')->get();
     foreach ($tenantSwitcher as $ts) {
         // From the MakesTenantAware trait in src/TenantAwareServiceProvider.php:
@@ -55,13 +54,13 @@ it('INSERTs or UPDATEs the users table in subdomain databases', function() {
                 ],
             ],
             ['email'],
-            ['name','email','email_verified_at','password','remember_token','created_at','updated_at']
+            ['name', 'email', 'email_verified_at', 'password', 'remember_token', 'created_at', 'updated_at']
         );
         expect($result)->toBeTruthy();
     }
 });
 
-it('publishes subdomain files', function() {
+it('publishes subdomain files', function () {
     $configTestDirectory = realpath(__DIR__.'/../config/tenant-aware.php');
     $routesTestDirectory = realpath(__DIR__.'/../routes/subdomains.php');
     // When using orchestra/testbench, Laravel's VendorPublishCommand understandably assumes its own path.
@@ -72,7 +71,7 @@ it('publishes subdomain files', function() {
     expect($copiedRoutesFile)->toBeTrue();
 });
 
-it('tests a subdomain\'s container', function() {
+it('tests a subdomain\'s container', function () {
     $domain = config('tenant-aware.domain');
     $response = $this->get("https://elephpant.$domain");
     $response->assertStatus(200);
@@ -86,5 +85,3 @@ it('tests a subdomain\'s container', function() {
         ->and($json['tenantSwitcher']['tenant_domain'])->toBe('elephpant.example.com')
         ->and($json['tenantSwitcher']['tenant_database'])->toBe('db_elephpants');
 });
-
-

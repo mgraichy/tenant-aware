@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Log;
 use TenantAware\Concerns\MakesTenantAware;
 use TenantAware\Exceptions\TenantAwareDatabaseException;
 
-
 class TenantAwareArtisan extends Command
 {
     use MakesTenantAware;
+
     /**
      * The name and signature of the console command.
      *
@@ -48,16 +48,16 @@ class TenantAwareArtisan extends Command
 
         foreach ($tenantSwitcher as $switched) {
             $this->newLine();
-            $this->line("---------------------------------------------------------------");
+            $this->line('---------------------------------------------------------------');
             $this->info("Running '$artisanCommand' for {$switched->tenant_name} (Tenant ID: {$switched->id})");
-            $this->line("---------------------------------------------------------------");
+            $this->line('---------------------------------------------------------------');
 
             try {
                 $this->configureDatabases($switched);
                 $this->doesCurrentDatabaseExist($switched->tenant_database);
                 Artisan::call($individualTenantCommand);
                 $this->line("Successfully ran: $individualTenantCommand");
-            } catch(\Throwable $e) {
+            } catch (\Throwable $e) {
                 $this->line('An exception occurred:');
                 $this->line($e->getMessage());
                 Log::error(__METHOD__.'():', ['stacktrace' => $e->getTrace()]);
@@ -67,7 +67,7 @@ class TenantAwareArtisan extends Command
 
     protected function doesCurrentDatabaseExist(string $database): void
     {
-        $exists = <<<SQL
+        $exists = <<<'SQL'
             SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME =  ?;
         SQL;
         if (empty(DB::connection('mysql')->select($exists, [$database]))) {
@@ -81,6 +81,7 @@ class TenantAwareArtisan extends Command
                 SQL;
                 DB::connection('mysql')->select($db);
                 $this->line("Database '$database' successfully created!");
+
                 return;
             }
 

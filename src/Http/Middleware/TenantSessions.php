@@ -18,11 +18,11 @@ class TenantSessions
         $tenantSwitcher = app()['tenantSwitcher'] ?? null;
 
         // For the the CLI, etc:
-        if (!$tenantSwitcher) {
+        if (! $tenantSwitcher) {
             return $next($request);
         }
 
-        if (!$request->session()->has('tenant_id')) {
+        if (! $request->session()->has('tenant_id')) {
             $request->session()->put('tenant_id', $tenantSwitcher['id']);
 
             return $next($request);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TenantSwitcherModel extends Model
 {
     protected $connection = 'mysql';
+
     protected $table = 'tenant_switcher';
 
     public function configureDatabases(): TenantSwitcherModel

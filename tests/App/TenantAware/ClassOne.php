@@ -9,8 +9,5 @@ class ClassOne
         $this->method();
     }
 
-    public function method(): void
-    {
-        return;
-    }
+    public function method(): void {}
 }

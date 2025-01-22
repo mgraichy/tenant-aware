@@ -5,10 +5,9 @@ namespace App\Models;
 // use TenantAware\Models\TenantSwitcherModel;
 use Illuminate\Database\Eloquent\Model;
 
-class Storefront extends Model//TenantSwitcherModel
+class Storefront extends Model // TenantSwitcherModel
 {
     protected $table = 'users';
-
 
     public function method()
     {
