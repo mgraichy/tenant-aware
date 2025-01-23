@@ -4,7 +4,7 @@ namespace Tests\App\TenantAware;
 
 class ClassOne
 {
-    public function __invoke()
+    public function __invoke(): void
     {
         $this->method();
     }

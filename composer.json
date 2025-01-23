@@ -1,6 +1,6 @@
 {
     "name": "mgraichy/tenant-aware",
-    "description": "A package for multitenancy",
+    "description": "A package for multitenancy in Laravel",
     "license": "MIT",
     "autoload": {
         "psr-4": {
