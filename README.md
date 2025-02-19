@@ -120,7 +120,9 @@ return [
     - **`'FQCN'`.** The fully-qualified class name of each class you include in this file (if any).
     - **`'__construct-params'`.** Any parameters used in the class(es)' constructor.
     - **`'__invoke-params'`.** Any parameters necessary for the `__invoke()` method of this class.
-  - **Rationale behind the `__invoke()` Magic Method.** Including an `__invoke()` method maintains the developer's hook into the package itself, without the package needing to know the name(s) of the method(s) to call.
+  - **Motivation for the `__invoke()` Magic Method.** Including an `__invoke()` method maintains the developer's hook into the package itself, without the package needing to know the name(s) of the method(s) to call.
+  - **Motivation behind Using Arrays rather than Collections.** Arrays are much more time-efficient than collections, which are wrappers around the array.
+    - Arrays were chosen because they are being used only as a way to move data to the service provider (and not to transform that data in any way with a collection).
 
 
 
